@@ -3,6 +3,7 @@ const fs = require('fs');
 const _ = require('underscore');
 const utils = require('jsonresume-themeutils');
 const moment = require('moment');
+moment.locale('fr');
 const markdown = require('markdown-it')({
     breaks: true
 }).use(require('markdown-it-abbr'));
@@ -10,8 +11,12 @@ const markdown = require('markdown-it')({
 const { renderResume } = require('./tpl/index');
 
 require('./moment-precise-range.js');
+function getFormattedDate(date, date_format) {
+    date_format = date_format || 'MMM YYYY';
+    return moment(date).format(date_format);
+}
 
-utils.setConfig({ date_format: 'MMM, YYYY' });
+utils.setConfig({ date_format: 'MMM YYYY' });
 
 function render(resume) {
     const addressAttrs = ['address', 'city', 'region', 'countryCode', 'postalCode'];
@@ -48,11 +53,11 @@ function render(resume) {
         }
 
         if (start_date.isValid()) {
-          project_info.startDate = utils.getFormattedDate(start_date);
+          project_info.startDate = getFormattedDate(start_date);
         }
 
         if (end_date.isValid()) {
-          project_info.endDate = utils.getFormattedDate(end_date);
+          project_info.endDate = getFormattedDate(end_date);
         }
 
         project_info.description = convertMarkdown(project_info.description);
@@ -73,11 +78,11 @@ function render(resume) {
         }
 
         if (start_date.isValid()) {
-          work_info.startDate = utils.getFormattedDate(start_date);
+          work_info.startDate = getFormattedDate(start_date);
         }
 
         if (end_date.isValid()) {
-          work_info.endDate = utils.getFormattedDate(end_date);
+          work_info.endDate = getFormattedDate(end_date);
         }
 
         work_info.summary = convertMarkdown(work_info.summary);
@@ -87,7 +92,7 @@ function render(resume) {
     });
 
     _(resume.skills).forEach(skill_info => {
-        const levels = ['Beginner', 'Intermediate', 'Advanced', 'Master'];
+        const levels = ['Débutant', 'Intermédiare', 'Advancé', 'Confirmé'];
 
         skill_info.keywords = _(skill_info.keywords)
             .map(k => convertMarkdown(k));
@@ -103,7 +108,7 @@ function render(resume) {
             const date = education_info[type];
 
             if (date) {
-                education_info[type] = utils.getFormattedDate(date);
+                education_info[type] = getFormattedDate(date);
             }
         });
 
@@ -115,7 +120,7 @@ function render(resume) {
         const date = c.date;
 
         if (date) {
-            c.date = utils.getFormattedDate(date, 'MMM DD, YYYY');
+            c.date = getFormattedDate(date, 'MMM DD, YYYY');
         }
     });
 
@@ -125,7 +130,7 @@ function render(resume) {
         a.summary = convertMarkdown(a.summary);
 
         if (date) {
-            a.date = utils.getFormattedDate(date, 'MMM DD, YYYY');
+            a.date = getFormattedDate(date, 'MMM DD, YYYY');
         }
     });
 
@@ -136,7 +141,7 @@ function render(resume) {
             const date = v[type];
 
             if (date) {
-                v[type] = utils.getFormattedDate(date);
+                v[type] = getFormattedDate(date);
             }
         });
 
@@ -149,7 +154,7 @@ function render(resume) {
         p.summary = convertMarkdown(p.summary);
 
         if (date) {
-            p.releaseDate = utils.getFormattedDate(date, 'MMM DD, YYYY');
+            p.releaseDate = getFormattedDate(date, 'DD MMM YYYY');
         }
     });
 
@@ -188,17 +193,17 @@ function convertMarkdown(str) {
 
 function getFloatingNavItems(resume) {
     const floating_nav_items = [
-        {label: 'About', target: 'about', icon: 'board', requires: 'basics.summary'},
-        {label: 'Work Experience', target: 'work-experience', icon: 'office', requires: 'work'},
+        {label: 'À propos', target: 'about', icon: 'board', requires: 'basics.summary'},
+        {label: 'Expérience professionelle', target: 'work-experience', icon: 'office', requires: 'work'},
         {label: 'Projects Experience', target: 'projects-experience', icon: 'code', requires: 'projects'},
-        {label: 'Skills', target: 'skills', icon: 'tools', requires: 'skills'},
-        {label: 'Education', target: 'education', icon: 'graduation-cap', requires: 'education'},
-        {label: 'Certificates', target: 'certificates', icon: 'profile', requires: 'certificates'},
-        {label: 'Awards', target: 'awards', icon: 'trophy', requires: 'awards'},
-        {label: 'Volunteer Work', target: 'volunteer-work', icon: 'child', requires: 'volunteer'},
+        {label: 'Compétences', target: 'skills', icon: 'tools', requires: 'skills'},
+        {label: 'Formation', target: 'education', icon: 'graduation-cap', requires: 'education'},
+        {label: 'Certifications', target: 'certificates', icon: 'profile', requires: 'certificates'},
+        {label: 'Récompenses', target: 'awards', icon: 'trophy', requires: 'awards'},
+        {label: 'Volontariat', target: 'volunteer-work', icon: 'child', requires: 'volunteer'},
         {label: 'Publications', target: 'publications', icon: 'newspaper', requires: 'publications'},
-        {label: 'Interests', target: 'interests', icon: 'heart', requires: 'interests'},
-        {label: 'References', target: 'references', icon: 'thumbs-up', requires: 'references'}
+        {label: 'Intérêts', target: 'interests', icon: 'heart', requires: 'interests'},
+        {label: 'Références', target: 'references', icon: 'thumbs-up', requires: 'references'}
     ];
 
     return _(floating_nav_items).filter(item => {
